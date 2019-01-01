@@ -52,9 +52,10 @@ fs.readdir(dirOutput, (err, outFiles) => {
       if (parsed.songs[i].title) { // do not save empty objects {}
         const fn = parsed.songs[i].title
           .replace(/\s/g, '_')
-          .replace(/\?/g, ''); // question marks do not work on windows
+          .replace(/\?/g, '') // question marks do not work on windows
+          .toLowerCase();
 
-        fs.writeFile(`${dirOutput}/${fn}.json`, JSON.stringify(parsed.songs[i], null, 2), err => {
+        fs.writeFile(`${dirOutput}/${fn}.json`, JSON.stringify(parsed.songs[i]), err => {
           if (err) throw err;
         });
 

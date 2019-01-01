@@ -42,15 +42,15 @@ function chart(data, reg) {
     this.style = parts[2];
 
     // get key (eg. Eb, C- etc.)
-    // this.Key = parts[3]; // ignore key
+     this.key = parts[3]; // ignore key
 
     // add rtrb-specific fields
-    this.createdBy = 'rtrb.io';
-    this.collaborators = [];
+    //this.createdBy = 'rtrb.io';
+    //this.collaborators = [];
 
     // bump up rating
-    this.clones = Math.floor(Math.random()*300);
-    this.ratings = [0,0,0,Math.floor(Math.random()*50),Math.floor(Math.random()*100)];
+    //this.clones = Math.floor(Math.random()*300);
+    //this.ratings = [0,0,0,Math.floor(Math.random()*50),Math.floor(Math.random()*100)];
 
     // get chart data
     let raw = unscramble.ireal(parts[4].split(musicPrefix)[1]);

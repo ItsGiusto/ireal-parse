@@ -28,7 +28,8 @@ module.exports = function(data) {
   }
 
   // DATA PREPROCESSING:
-  data = data.replace(/XyQ|alt|[UY]/g, '');
+  data = data.replace(/XyQ|[UY]/g, ' ');
+  data = data.replace(/7alt/g, '7b9');
   data = data.replace(/,/g, ' ');
   data = data.replace(/Kcl/g, '|x');
   data = data.replace(/sus/g, 'u'); // disallow split on "s" to remove sus chord
@@ -41,9 +42,11 @@ module.exports = function(data) {
   // see Crosscurrent, Miles Ahead, Someday (You'll Be Sorry), When You're Smilin'
   data = data.replace(/\*7us\*/g, '7u'); // this was a typo error in crosscurrent
   data = data.replace(/\*7\+\*/g, '7+');
+  data = data.replace(/ *\([^)]*\) */g, ' '); // remove alt chords
 
   // DATA SPLITTING:
   data = data.split(/(\{|\}|\[|\]|\||\s|T\d\d|\*\w|N\d|Z|x|<.*?>|Q|S|s|l)/);
+
   for (let i = 0; i < data.length; i++) {
     let d = data[i];
 
@@ -124,12 +127,12 @@ module.exports = function(data) {
               }
             }
           }
-
           // bardata post processing
           bardata = bardata.map((chord) => {
             chord = chord.replace(/ *\([^)]*\) */g, ''); // remove alt chords
             chord = chord.replace(/p/g, '/'); // convert p to slashes
             chord = chord.replace(/W/g, ''); // convert W to empty
+            chord = chord.replace(/h7/g, '-7b5'); // convert h7 to -7b5
             return chord;
           });
 
@@ -142,16 +145,24 @@ module.exports = function(data) {
           barcomments = barcomments.map(comment => comment.substr(1,comment.length-2)).join();
           // push the fully formed bar into chartdata and barhistory
           [ret, state['barHistory']].forEach((arr) => {
-            arr.push({
+            let toAdd = {
               barData: bardata,
               denominator: state['timeSignature']['denominator'],
+              numerator: state['timeSignature']['numerator'],
               endBarline: d,
-              barWidth: 1,
-              comment: barcomments ? barcomments : null,
-              section: barsection ? barsection[1] : null,
-              timeBar: bartimebar ? bartimebar[1] : null,
-              symbol: barsymbol ? barsymbol : null,
-            });
+              //barWidth: 1,
+              //comment: barcomments ? barcomments : null,
+            }
+            if (barsection) {
+              toAdd["section"] = barsection[1]
+            }
+            if (bartimebar) {
+              toAdd["timeBar"] = bartimebar[1]
+            }
+            if (barsymbol) {
+              toAdd["symbol"] = barsymbol
+            }
+            arr.push(toAdd);
           });
 
           // reset bar state
@@ -218,6 +229,21 @@ module.exports = function(data) {
 
   // remove first (useless) bar
   ret.splice(0, 1);
+
+  let prev_num = ret[0]["numerator"]
+  let prev_den = ret[0]["denominator"]
+  for (let j = 1; j < ret.length; j++) {
+    let den = ret[j]["denominator"]
+    let num = ret[j]["numerator"]
+    let time_sig_change = den !== prev_den || num !== prev_num
+    if (time_sig_change) {
+      prev_den = den;
+      prev_num = num
+    } else {
+      delete ret[j].denominator
+      delete ret[j].numerator
+    }
+  }
 
   return ret;
 };
