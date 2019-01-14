@@ -43,7 +43,7 @@ fs.readdir(dirOutput, (err, outFiles) => {
 
   let ii = 1;
 
-  fs.readFile(`${dirInput}/1300.txt`, (err, data) => {
+  fs.readFile(`${dirInput}/itsgiusto_add.txt`, (err, data) => {
     if (err) throw err;
 
     const parsed = new iRealReader(data, reg);
